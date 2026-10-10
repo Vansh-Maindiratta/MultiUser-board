@@ -38,6 +38,19 @@ export function registerBoardHandlers(io) {
           await room.save();
         }
 
+        if (socket.data.roomCode && socket.data.roomCode !== room.code) {
+          const previousRoomCode = socket.data.roomCode;
+          const previousRoomId = socket.data.roomId;
+          await socket.leave(previousRoomCode);
+          socket.data.roomCode = null;
+          socket.data.roomId = null;
+          socket.to(previousRoomCode).emit('presence:left', { participantId: socket.data.user.id });
+          broadcastPresence(io, previousRoomCode);
+          if (!io.sockets.adapter.rooms.get(previousRoomCode)?.size) {
+            await boardService.releaseBoard(previousRoomId);
+          }
+        }
+
         await socket.join(room.code);
         socket.data.roomCode = room.code;
         socket.data.roomId = room._id.toString();
@@ -64,11 +77,11 @@ export function registerBoardHandlers(io) {
       if (!roomCode) return;
 
       await socket.leave(roomCode);
-      socket.data.roomCode = null;
 
       socket.to(roomCode).emit('presence:left', { participantId: socket.data.user.id });
       broadcastPresence(io, roomCode);
       releaseBoardIfEmpty(io, socket);
+      socket.data.roomCode = null;
       } catch (error) { rejectSocket(socket, error); }
     });
 
@@ -149,12 +162,12 @@ export function registerBoardHandlers(io) {
 
     socket.on('disconnect', () => {
       const roomCode = socket.data.roomCode;
-      socket.data.roomCode = null;
       if (!roomCode) return;
 
       socket.to(roomCode).emit('presence:left', { participantId: socket.data.user.id });
       broadcastPresence(io, roomCode);
       releaseBoardIfEmpty(io, socket);
+      socket.data.roomCode = null;
     });
 
     socket.on('error', (error) => {

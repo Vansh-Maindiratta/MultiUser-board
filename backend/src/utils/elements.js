@@ -5,7 +5,7 @@ const TYPES = new Set(['pen', 'line', 'arrow', 'rectangle', 'circle', 'text', 's
 const BOUND_TYPES = new Set(['rectangle', 'circle', 'text', 'sticky']);
 
 const MAX_COORDINATE = 100000;
-const MAX_POINTS = 5000;
+const MAX_POINTS = 500;
 const MAX_TEXT_LENGTH = 2000;
 const MAX_STROKE_WIDTH = 80;
 const MAX_ID_LENGTH = 64;
@@ -30,7 +30,7 @@ function toCoordinate(value) {
 function toSize(value, fallback) {
   const number = toCoordinate(value);
   if (number === null) return fallback;
-  return Math.min(Math.max(number, 1), MAX_COORDINATE);
+  return Math.min(Math.max(Math.abs(number), 1), MAX_COORDINATE);
 }
 
 function toStrokeWidth(value) {
@@ -101,7 +101,14 @@ export function sanitizeElement(input) {
     const x = toCoordinate(input.x);
     const y = toCoordinate(input.y);
     if (x === null || y === null) return null;
-    const bound = { x, y, width: toSize(input.width, 160), height: toSize(input.height, 90) };
+    const rawWidth = toCoordinate(input.width);
+    const rawHeight = toCoordinate(input.height);
+    const bound = {
+      x: rawWidth !== null && rawWidth < 0 ? toCoordinate(x + rawWidth) : x,
+      y: rawHeight !== null && rawHeight < 0 ? toCoordinate(y + rawHeight) : y,
+      width: toSize(input.width, 160),
+      height: toSize(input.height, 90),
+    };
     if (type === 'text' || type === 'sticky') {
       return { ...element, ...bound, text: toText(input.text) };
     }

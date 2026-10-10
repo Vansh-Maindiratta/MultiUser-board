@@ -72,10 +72,20 @@ describe('sanitizeElement', () => {
     assert.match(element.color, /^#[0-9a-f]{6}$/);
   });
 
-  it('keeps box sizes above the minimum', () => {
-    const element = sanitizeElement({ id: 'a', type: 'sticky', x: 0, y: 0, width: -50, height: 0 });
+  it('normalizes box elements drawn toward the upper-left', () => {
+    const element = sanitizeElement({ id: 'a', type: 'sticky', x: 80, y: 60, width: -50, height: -30 });
+
+    assert.equal(element.x, 30);
+    assert.equal(element.y, 30);
+    assert.equal(element.width, 50);
+    assert.equal(element.height, 30);
+  });
+
+  it('keeps zero-sized box elements above the minimum', () => {
+    const element = sanitizeElement({ id: 'a', type: 'sticky', x: 0, y: 0, width: 0, height: 0 });
 
     assert.equal(element.width, 1);
+    assert.equal(element.height, 1);
   });
 });
 

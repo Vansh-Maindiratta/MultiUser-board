@@ -82,7 +82,8 @@ export default function Whiteboard({
 
   const toPoint = useCallback((event) => {
     const rect = canvasRef.current.getBoundingClientRect();
-    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const ratio = window.devicePixelRatio || 1;
+    return { x: (event.clientX - rect.left) * ratio, y: (event.clientY - rect.top) * ratio };
   }, []);
 
   const findElementAt = useCallback(

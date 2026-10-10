@@ -67,7 +67,7 @@ export function createElement(type, position, style) {
       width: 180,
       height: 180,
       text: 'Note',
-      fill: style.stickyColor,
+      fill: style.color,
     };
   }
 

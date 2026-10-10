@@ -16,7 +16,7 @@ export function getSocket(token) {
   }
 
   if (!socket) {
-    socket = io(SOCKET_URL, { auth: { token } });
+    socket = io(SOCKET_URL, { auth: { token }, reconnection: false });
   }
 
   return socket;

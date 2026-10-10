@@ -310,6 +310,32 @@ describeWithDatabase('socket collaboration', () => {
     }
   });
 
+  it('leaves the previous room when one socket switches rooms', async () => {
+    const asha = await createSession('Asha', 'asha.switch@example.com');
+    const kabir = await createSession('Kabir', 'kabir.switch@example.com');
+    const firstRoom = await createRoom(asha.token, 'First room');
+    const secondRoom = await createRoom(asha.token, 'Second room');
+
+    const ashaSocket = await openSocket(asha.token);
+    const kabirSocket = await openSocket(kabir.token);
+    assert.equal((await emitWithAck(ashaSocket, 'room:join', { roomCode: firstRoom.code })).ok, true);
+    assert.equal((await emitWithAck(kabirSocket, 'room:join', { roomCode: firstRoom.code })).ok, true);
+
+    const leftPresence = nextEvent(kabirSocket, 'presence:list');
+    const secondJoin = await emitWithAck(ashaSocket, 'room:join', { roomCode: secondRoom.code });
+    assert.equal(secondJoin.ok, true);
+    assert.deepEqual((await leftPresence).participants.map((participant) => participant.id), [kabir.user.id]);
+
+    const leakedEvent = nextEvent(ashaSocket, 'board:element:upsert', 300);
+    kabirSocket.emit('board:element:upsert', {
+      element: { id: 'first-room-only', type: 'pen', points: [{ x: 2, y: 2 }] },
+    });
+    assert.equal(await leakedEvent, null);
+
+    ashaSocket.close();
+    kabirSocket.close();
+  });
+
   it('lets every member of a room see the shared board and the presence list', async () => {
     const asha = await createSession('Asha', 'asha.presence@example.com');
     const kabir = await createSession('Kabir', 'kabir.presence@example.com');

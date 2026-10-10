@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { disconnectSocket, getSocket } from '../services/socket.js';
 import { elementSignature, upsertElement as upsertIntoArray } from '../utils/elements.js';
 
-const HISTORY_LIMIT = 40;
+const HISTORY_LIMIT = 1;
 const ACTIVITY_TIMEOUT = 4000;
 
 export function useBoardRoom(token, roomCode) {

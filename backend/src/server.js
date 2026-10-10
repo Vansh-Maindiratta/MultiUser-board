@@ -48,14 +48,3 @@ if (missingKeys.length > 0) {
     process.exitCode = 1;
   }
 }
-
-async function shutdown(signal) {
-  console.log(`\n${signal} received, shutting down`);
-  io.close();
-  httpServer.close();
-  await disconnectFromDatabase();
-  process.exit(0);
-}
-
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('SIGTERM', () => shutdown('SIGTERM'));

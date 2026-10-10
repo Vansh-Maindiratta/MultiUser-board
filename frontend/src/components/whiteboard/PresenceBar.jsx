@@ -25,7 +25,7 @@ export default function PresenceBar({ participants }) {
         ))}
       </ul>
       {participants.length > 6 ? (
-        <span className="ml-2 text-xs text-slate-500">+{participants.length - 6} more</span>
+        <span className="ml-2 text-xs text-slate-500">+{participants.length - 5} more</span>
       ) : null}
     </div>
   );
